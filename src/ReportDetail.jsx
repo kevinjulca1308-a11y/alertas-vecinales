@@ -1,3 +1,4 @@
+import { getReportUrl } from "./native";
 import React, { useState } from "react";
 import {
   MapPin,
@@ -134,9 +135,7 @@ export default function ReportDetail({
             aria-label="Copiar enlace al reporte"
             onClick={async () => {
               try {
-                await navigator.clipboard.writeText(
-                  `${location.origin}${location.pathname}#reporte/${r.id}`,
-                );
+                await navigator.clipboard.writeText(getReportUrl(r.id));
                 notify("Enlace copiado");
               } catch {
                 setError(

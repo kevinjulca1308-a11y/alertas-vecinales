@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">AlertaVecinal</string>
+    <string name="title_activity_main">AlertaVecinal</string>
+    <string name="package_name">com.alertavecinal.app</string>
+    <string name="custom_url_scheme">com.alertavecinal.app</string>
+</resources>

@@ -1,3 +1,4 @@
+import { isNative, nativePhoto } from "./native";
 import React, { useState, useRef } from "react";
 import {
   Camera,
@@ -49,6 +50,31 @@ export default function ReportForm({ onCreated, onClose }) {
       const images = [];
       for (const file of files) images.push(await compressPhoto(file));
       setForm((prev) => ({ ...prev, photos: [...prev.photos, ...images] }));
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      readLock.current = false;
+      setReading(false);
+    }
+  };
+  const choosePhoto = async (source) => {
+    if (!isNative()) {
+      (source === "camera" ? camera : gallery).current.click();
+      return;
+    }
+    if (readLock.current) return;
+    readLock.current = true;
+    setReading(true);
+    setError("");
+    try {
+      const file = await nativePhoto(source);
+      if (file) {
+        const photo = await compressPhoto(file);
+        setForm((prev) => ({
+          ...prev,
+          photos: [...prev.photos, photo].slice(0, 3),
+        }));
+      }
     } catch (e) {
       setError(e.message);
     } finally {
@@ -224,14 +250,14 @@ export default function ReportForm({ onCreated, onClose }) {
               <button
                 type="button"
                 disabled={reading || form.photos.length >= 3}
-                onClick={() => camera.current.click()}
+                onClick={() => choosePhoto("camera")}
               >
                 <Camera size={20} /> Usar cámara
               </button>
               <button
                 type="button"
                 disabled={reading || form.photos.length >= 3}
-                onClick={() => gallery.current.click()}
+                onClick={() => choosePhoto("gallery")}
               >
                 {reading ? (
                   <LoaderCircle size={20} className="spin" />

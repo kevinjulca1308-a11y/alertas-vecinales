@@ -84,7 +84,17 @@ Para despliegue: usa Node 24, un disco persistente para `data/`, un solo proceso
 
 ## Android Studio
 
-La interfaz sigue escrita en JavaScript y React. Capacitor puede empaquetarla para Android, pero el APK necesita conectarse a una API HTTPS accesible: el servidor de tu computadora no se incluye en el APK. La integración nativa de Capacitor, sus plugins de cámara/GPS y la configuración del servidor remoto no están incluidas. Primero prueba el flujo web completo con `npm run dev`.
+El proyecto Android está incluido en `android/`, con Capacitor 7, cámara/galería y GPS nativos, sesiones mediante HTTP nativo y exportación CSV con el diálogo de compartir Android.
+
+```powershell
+npm.cmd ci
+npm.cmd run android:sync
+npm.cmd run android:open
+```
+
+Mantén `npm.cmd run dev` abierto en otra terminal. El emulador se conecta a `http://10.0.2.2:3001`. Para un celular real configura la IP de tu computadora desde «Servidor Android» en la app.
+
+Consulta [ANDROID.md](ANDROID.md) para los pasos completos, los requisitos de Android Studio, cómo generar el APK y configurar un servidor HTTPS. La base SQLite sigue en el backend; no está incluida dentro del APK.
 
 ## Red y privacidad
 

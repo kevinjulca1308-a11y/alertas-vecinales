@@ -1,22 +1,35 @@
+import { isNative, nativeRequest, nativeLocation, shareCsv } from "./native";
 export async function api(path, options = {}) {
-  const response = await fetch(`/api${path}`, {
-    credentials: "same-origin",
-    ...options,
-    headers: { "Content-Type": "application/json", ...options.headers },
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  });
-  let result;
+  let result, status;
   try {
-    result = await response.json();
+    if (isNative()) {
+      const response = await nativeRequest(path, options);
+      status = response.status;
+      result =
+        typeof response.data === "string"
+          ? JSON.parse(response.data)
+          : response.data;
+    } else {
+      const response = await fetch(`/api${path}`, {
+        credentials: "same-origin",
+        ...options,
+        headers: { "Content-Type": "application/json", ...options.headers },
+        body: options.body ? JSON.stringify(options.body) : undefined,
+      });
+      status = response.status;
+      result = await response.json();
+    }
   } catch {
     throw new Error(
-      "No se pudo conectar con el servidor. Usa npm run dev para iniciar la app completa.",
+      isNative()
+        ? "No se pudo conectar al servidor. Inícialo en tu computadora y revisa la dirección en Servidor Android."
+        : "No se pudo conectar con el servidor. Usa npm run dev para iniciar la app completa.",
     );
   }
-  if (!response.ok)
+  if (status < 200 || status >= 300)
     throw Object.assign(
-      new Error(result.error || "No se pudo completar la operación."),
-      { status: response.status },
+      new Error(result?.error || "No se pudo completar la operación."),
+      { status },
     );
   return result;
 }
@@ -51,6 +64,7 @@ export async function compressPhoto(file) {
   }
 }
 export function getLocation() {
+  if (isNative()) return nativeLocation();
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation)
       return reject(
@@ -68,7 +82,7 @@ export function getLocation() {
     );
   });
 }
-export function downloadReports(reports) {
+export async function downloadReports(reports) {
   const columns = [
     "Código",
     "Título",
@@ -99,13 +113,14 @@ export function downloadReports(reports) {
     r.date,
     r.demo ? "Sí" : "No",
   ]);
-  const blob = new Blob(
-    [
-      "\uFEFF" +
-        [columns, ...rows].map((row) => row.map(escape).join(",")).join("\r\n"),
-    ],
-    { type: "text/csv;charset=utf-8" },
-  );
+  const csv =
+    "\uFEFF" +
+    [columns, ...rows].map((row) => row.map(escape).join(",")).join("\r\n");
+  if (isNative()) {
+    await shareCsv(csv);
+    return;
+  }
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;

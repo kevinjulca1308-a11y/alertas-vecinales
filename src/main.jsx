@@ -1,3 +1,5 @@
+import { isNative } from "./native";
+import ServerSettings from "./ServerSettings";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { createRoot } from "react-dom/client";
 import {
@@ -156,6 +158,19 @@ function App() {
     setPriority("Todas");
     setFilters(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+  const exportData = async (data) => {
+    try {
+      await downloadReports(data);
+      notify(
+        isNative()
+          ? "Archivo listo para compartir."
+          : "Se descargó el archivo CSV.",
+      );
+    } catch (e) {
+      if (!/cancel/i.test(e.message))
+        notify("No se pudo exportar el archivo. Inténtalo nuevamente.");
+    }
   };
   const auth = (after = null) => {
     setIntent(after);
@@ -334,6 +349,11 @@ function App() {
               Hacer un reporte <ArrowUpRight size={16} />
             </button>
           </div>
+          {isNative() && (
+            <button className="help-link" onClick={() => setModal("server")}>
+              <SlidersHorizontal size={17} /> Servidor Android
+            </button>
+          )}
           <button className="help-link" onClick={() => setModal("help")}>
             <Info size={17} /> ¿Cómo funciona?
           </button>
@@ -540,7 +560,7 @@ function App() {
                       </div>
                       <button
                         className="button secondary"
-                        onClick={() => downloadReports(visibleReports)}
+                        onClick={() => exportData(visibleReports)}
                       >
                         <Download size={16} /> Exportar
                       </button>
@@ -653,8 +673,7 @@ function App() {
                             className="icon-button"
                             aria-label="Exportar reportes filtrados"
                             onClick={() => {
-                              downloadReports(filtered);
-                              notify("Se descargó el archivo CSV.");
+                              exportData(filtered);
                             }}
                           >
                             <Download size={17} />
@@ -1127,7 +1146,19 @@ function App() {
             setIntent(null);
           }}
         >
-          {modal === "auth" ? (
+          {modal === "server" ? (
+            <ServerSettings
+              onSaved={() => {
+                setModal(null);
+                setReports([]);
+                setUser(null);
+                closeReport();
+                setLoading(true);
+                load();
+                notify("Servidor conectado.");
+              }}
+            />
+          ) : modal === "auth" ? (
             <AuthForm
               onSuccess={(u) => {
                 setUser(u);

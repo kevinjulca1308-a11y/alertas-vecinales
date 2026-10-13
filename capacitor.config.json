@@ -1,0 +1,12 @@
+{
+  "appId": "com.alertavecinal.app",
+  "appName": "AlertaVecinal",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "backgroundColor": "#203d31"
+  },
+  "loggingBehavior": "none"
+}
