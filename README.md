@@ -82,6 +82,10 @@ Las pruebas de navegador inician frontend y API propios con una base en memoria 
 
 Para despliegue: usa Node 24, un disco persistente para `data/`, un solo proceso de API y HTTPS mediante un proxy. Define `NODE_ENV=production` para cookies Secure. Los datos de cada instalación son independientes hasta conectar los clientes al mismo servidor. No hay recuperación de contraseña ni cuentas municipales verificadas en esta versión.
 
+## APK automático en GitHub
+
+En **Actions → Compilar APK Android → Run workflow** puedes generar el APK sin instalar Android Studio. También se compila automáticamente al subir cambios a `main`. Cuando termine, descarga el ZIP **AlertaVecinal-Android-…** desde **Artifacts** y extrae `AlertaVecinal-debug.apk`. Se conserva durante 14 días. La app sigue necesitando el servidor Node.js/SQLite.
+
 ## Android Studio
 
 El proyecto Android está incluido en `android/`, con Capacitor 7, cámara/galería y GPS nativos, sesiones mediante HTTP nativo y exportación CSV con el diálogo de compartir Android.

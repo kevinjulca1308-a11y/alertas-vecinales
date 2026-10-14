@@ -61,6 +61,23 @@ npm.cmd run android:sync
 
 Después vuelve a ejecutar con **▶ Run**. `android:sync` compila React y copia los archivos y los plugins al proyecto Android. No modifica ni borra tu base de datos.
 
+## Compilar automáticamente desde GitHub
+
+El workflow **Compilar APK Android** compila un APK de prueba al subir cambios a `main`. También puedes iniciarlo manualmente:
+
+1. Abre el repositorio en GitHub y entra en **Actions**.
+2. Selecciona **Compilar APK Android**.
+3. Pulsa **Run workflow**, deja la rama `main` y confirma **Run workflow**.
+4. Abre la ejecución más reciente y espera que termine con una marca verde.
+5. En la sección **Artifacts**, descarga **AlertaVecinal-Android-…**. Debes iniciar sesión en GitHub para descargar artefactos.
+6. Descomprime el ZIP y encontrarás **AlertaVecinal-debug.apk** y su suma SHA-256.
+
+No necesitas Node.js ni Android Studio en tu computadora para generar este APK: GitHub prepara Node 24, JDK 21 y el SDK 35, ejecuta las pruebas y compila la app. Los artefactos se conservan **14 días**; puedes generar otro APK ejecutando nuevamente el workflow. Si no aparece el botón, verifica que Actions esté habilitado y que tengas permisos de escritura en el repositorio.
+
+La compilación automática no incluye el servidor ni ejecuta un emulador. Para usar los reportes debes encender el backend en tu computadora o conectar un servidor HTTPS. En Android Studio también puedes arrastrar el APK descargado al emulador para instalarlo.
+
+Cada ejecución utiliza una firma de prueba nueva. Si Android rechaza instalarla como actualización, desinstala la app anterior y luego instala el nuevo APK. Los reportes del servidor se conservan, aunque tendrás que iniciar sesión y configurar otra vez la dirección del servidor en el dispositivo.
+
 ## Generar un APK de prueba
 
 Tras ejecutar `android:sync`, desde PowerShell:
