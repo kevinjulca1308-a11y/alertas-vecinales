@@ -39,13 +39,7 @@ jobs:
           cache: gradle
 
       - name: Preparar SDK Android 35
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          import subprocess
-          subprocess.run(['sdkmanager', '--licenses'], input='y\n' * 100, text=True, check=True)
-          subprocess.run(['sdkmanager', 'platforms;android-35', 'build-tools;35.0.0', 'build-tools;34.0.0'], check=True)
-          PY
+        run: python3 scripts/prepare-android-sdk.py
 
       - name: Instalar dependencias y ejecutar pruebas
         run: |
