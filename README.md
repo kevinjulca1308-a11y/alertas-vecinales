@@ -1,3 +1,15 @@
+## Usar la app sin costo de hosting
+
+La alternativa preparada es **Render Free + Firestore Spark + Cloudinary Free**. Consulta [DESPLIEGUE_GRATUITO.md](DESPLIEGUE_GRATUITO.md) para configurar las cuentas, publicar la API HTTPS y conectar el APK con datos móviles. Los planes gratuitos tienen cuotas y espera inicial.
+
+## Diseño y administración
+
+La app tiene temas claro/oscuro, una vista vecinal simplificada y administración con gestión de usuarios y moderación. Consulta [ADMINISTRACION.md](ADMINISTRACION.md) para asignar una cuenta administradora y conocer los permisos.
+
+## Firebase y logo personalizado
+
+La app admite Cloud Firestore y Firebase Storage, además de SQLite. Consulta [FIREBASE.md](FIREBASE.md) para configurar tu proyecto y activar la nube. El logo A-V está incluido en la web, el ícono Android y la pantalla de inicio.
+
 # AlertaVecinal · Reportes ciudadanos
 
 Aplicación web con React, API Node.js/Express y base de datos SQLite. Los vecinos pueden publicar problemas de alumbrado, limpieza, vías públicas y áreas verdes, adjuntar fotografías, ubicar el lugar y consultar el seguimiento.
@@ -30,7 +42,7 @@ En macOS/Linux los comandos son `npm ci` y `npm run dev`.
 - Comentarios y seguimiento con notas e historial. Solo el autor puede cambiar estados o eliminar su reporte.
 - Estadísticas y exportación CSV de los reportes visibles.
 - Navegación móvil, formularios accesibles por teclado, confirmación de eliminación y estados de error.
-- Actualización de reportes cada 30 segundos mientras la página está visible; botón para actualizar inmediatamente.
+- Actualización de reportes cada dos minutos mientras la página está visible; botón para actualizar inmediatamente.
 
 Los seis reportes iniciales son **ejemplos identificados**. Puedes ocultarlos. Sus ilustraciones y conteos no representan problemas reales. No hay integración con una municipalidad: los cambios de estado son observaciones de los vecinos.
 
@@ -105,3 +117,15 @@ Consulta [ANDROID.md](ANDROID.md) para los pasos completos, los requisitos de An
 El mapa usa `*.tile.openstreetmap.org`; las fuentes opcionales usan `fonts.googleapis.com` y `fonts.gstatic.com`. Las ilustraciones se incluyen en el proyecto y funcionan sin descargar imágenes externas. Si el mapa no carga, la app muestra un aviso y permite indicar coordenadas manualmente.
 
 El correo y las credenciales no se exponen en los reportes públicos. Las sesiones duran siete días; cerrar sesión invalida la cookie en el servidor. El autor puede eliminar su reporte y sus comentarios/seguimiento asociados. Evita publicar rostros, placas, documentos y datos personales.
+
+## Identidad visual y acceso independiente
+
+El logo actualizado se incluye en web, favicon y recursos nativos Android. El acceso tiene pantallas propias en `/#/login` y `/#/registro`, con estilos adaptados a escritorio, móvil y los temas claro/oscuro.
+
+Para comparar el nuevo fondo, abre tu cuenta → Preferencias → Fondo de la aplicación y elige **Degradado** o **Liso**. La elección queda guardada en tu navegador o instalación.
+
+Consulta [ANALISIS_DISENO.md](ANALISIS_DISENO.md) para la revisión general, los cambios implementados y las mejoras propuestas.
+
+## Usar datos móviles y publicar el servidor
+
+La comunidad inicial está configurada en Guadalupe, Pacasmayo, La Libertad. Para usar Android fuera de tu red local, consulta [DESPLIEGUE_HTTPS.md](DESPLIEGUE_HTTPS.md): incluye la preparación para Cloud Run y la configuración de una URL pública HTTPS en el APK.

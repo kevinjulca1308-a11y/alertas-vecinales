@@ -15,6 +15,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { categories } from "./data";
+import { community } from "./community";
 import { categoryIcons, categoryTone, MapView } from "./ui";
 import { api, compressPhoto, getLocation } from "./api";
 export default function ReportForm({ onCreated, onClose }) {
@@ -328,6 +329,7 @@ export default function ReportForm({ onCreated, onClose }) {
               )}{" "}
               {finding ? "Buscando ubicación..." : "Usar mi ubicación GPS"}
             </button>
+            <p className="location-community"><MapPin size={14} /> {community.label}. Selecciona el lugar exacto del reporte.</p>
             <MapView
               pick
               position={position}
@@ -364,7 +366,7 @@ export default function ReportForm({ onCreated, onClose }) {
                     onChange={(e) =>
                       setPosition([
                         e.target.value === "" ? NaN : Number(e.target.value),
-                        position?.[1] ?? -77.031,
+                        position?.[1] ?? community.center[1],
                       ])
                     }
                   />
@@ -380,7 +382,7 @@ export default function ReportForm({ onCreated, onClose }) {
                     value={position?.[1] ?? ""}
                     onChange={(e) =>
                       setPosition([
-                        position?.[0] ?? -12.118,
+                        position?.[0] ?? community.center[0],
                         e.target.value === "" ? NaN : Number(e.target.value),
                       ])
                     }

@@ -4,7 +4,9 @@ import { Geolocation } from "@capacitor/geolocation";
 import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
 export const isNative = () => Capacitor.isNativePlatform();
-export const DEFAULT_ANDROID_SERVER = "http://10.0.2.2:3001";
+export const DEFAULT_ANDROID_SERVER = normalizeServerUrl(
+  import.meta.env?.VITE_API_SERVER_URL || "http://10.0.2.2:3001",
+);
 export function normalizeServerUrl(value) {
   const url = new URL(value.trim());
   if (
@@ -42,15 +44,16 @@ export function getReportUrl(id) {
     : `${location.origin}${location.pathname}`;
   return `${root.replace(/\/$/, "")}/#reporte/${id}`;
 }
-export function nativeRequest(path, options = {}) {
+export function nativeRequest(path, options = {}, serverUrl = getServerUrl()) {
+  const timeout = Math.max(1, Math.floor((options.timeoutMs || 90000) / 2));
   return CapacitorHttp.request({
-    url: `${getServerUrl()}/api${path}`,
+    url: `${serverUrl}/api${path}`,
     method: options.method || "GET",
     headers: { "Content-Type": "application/json", ...options.headers },
     data: options.body,
     responseType: "json",
-    connectTimeout: 15000,
-    readTimeout: 20000,
+    connectTimeout: timeout,
+    readTimeout: timeout,
   });
 }
 export async function nativePhoto(source = "camera") {

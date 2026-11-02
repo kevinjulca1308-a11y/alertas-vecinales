@@ -1,0 +1,20 @@
+# Upload only the application source required by Dockerfile.
+**
+!Dockerfile
+!.dockerignore
+!package.json
+!package-lock.json
+!index.html
+!vite.config.js
+!src/
+!src/**
+!public/
+!public/**
+!server/
+!server/**
+# Credentials are never part of the build context.
+**/.env
+**/.env.*
+**/*service-account*.json
+**/*serviceAccount*.json
+**/*firebase-adminsdk*.json

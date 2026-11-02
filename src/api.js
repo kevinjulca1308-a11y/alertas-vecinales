@@ -1,38 +1,30 @@
-import { isNative, nativeRequest, nativeLocation, shareCsv } from "./native";
-export async function api(path, options = {}) {
-  let result, status;
-  try {
+import { isNative, nativeRequest, nativeLocation, shareCsv, getServerUrl } from "./native";
+import { createApiClient } from './api-client';
+const clients = new Map();
+function client(target) {
+  const key = isNative() ? target || getServerUrl() : location.origin;
+  if (!clients.has(key)) clients.set(key, createApiClient({ request: async (path, options = {}) => {
     if (isNative()) {
-      const response = await nativeRequest(path, options);
-      status = response.status;
-      result =
-        typeof response.data === "string"
-          ? JSON.parse(response.data)
-          : response.data;
-    } else {
-      const response = await fetch(`/api${path}`, {
-        credentials: "same-origin",
-        ...options,
-        headers: { "Content-Type": "application/json", ...options.headers },
-        body: options.body ? JSON.stringify(options.body) : undefined,
-      });
-      status = response.status;
-      result = await response.json();
+      const response = await nativeRequest(path, options, key);
+      let data = response.data;
+      if (typeof data === 'string') { try { data = JSON.parse(data); } catch { data = null; } }
+      return { status: response.status, data };
     }
-  } catch {
-    throw new Error(
-      isNative()
-        ? "No se pudo conectar al servidor. Inícialo en tu computadora y revisa la dirección en Servidor Android."
-        : "No se pudo conectar con el servidor. Usa npm run dev para iniciar la app completa.",
-    );
-  }
-  if (status < 200 || status >= 300)
-    throw Object.assign(
-      new Error(result?.error || "No se pudo completar la operación."),
-      { status },
-    );
-  return result;
+    const { timeoutMs = 90000, ...settings } = options;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetch(`/api${path}`, { ...settings, credentials: 'same-origin', signal: controller.signal,
+        headers: { 'Content-Type': 'application/json', ...settings.headers }, body: settings.body ? JSON.stringify(settings.body) : undefined });
+      let data = null;
+      try { data = await response.json(); } catch { /* A waking host can return HTML instead of JSON. */ }
+      return { status: response.status, data };
+    } finally { clearTimeout(timer); }
+  } }));
+  return clients.get(key);
 }
+export const api = (path, options) => client().call(path, options);
+export const checkServerConnection = (target) => client(target).check();
 export async function compressPhoto(file) {
   if (!file.type.startsWith("image/"))
     throw new Error("Selecciona una imagen JPG, PNG o WebP.");

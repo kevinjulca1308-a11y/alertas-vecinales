@@ -70,7 +70,7 @@ export default function ReportDetail({
     try {
       await api(`/reports/${r.id}`, { method: "DELETE" });
       onDelete(r.id);
-      notify("Tu reporte fue eliminado.");
+      notify("Reporte eliminado.");
     } catch (e) {
       setError(e.message);
     } finally {
@@ -205,7 +205,7 @@ export default function ReportDetail({
                 </div>
               ))}
             </div>
-            {r.own && (
+            {(r.own || user?.role === "admin") && (
               <form
                 className="status-form"
                 onSubmit={async (e) => {
@@ -218,7 +218,7 @@ export default function ReportDetail({
                 }}
               >
                 <h3>Registrar una actualización</h3>
-                <p>Comparte un cambio que hayas observado.</p>
+                <p>Registra el avance y deja una nota para la comunidad.</p>
                 <label className="field">
                   Nuevo estado
                   <select
@@ -261,7 +261,7 @@ export default function ReportDetail({
               <p>
                 {r.demo
                   ? "Este es un reporte de ejemplo. Sus datos y avances son ilustrativos."
-                  : "Los estados son actualizaciones del vecino; no representan una confirmación municipal."}
+                  : "El seguimiento puede ser actualizado por el autor o la administración de la comunidad."}
               </p>
             </div>
           </>
@@ -278,6 +278,12 @@ export default function ReportDetail({
                     </strong>
                     <time>{dateLabel(c.date)}</time>
                     <p>{c.body}</p>
+                    {user?.role === 'admin' && (
+                      <button className="moderate-comment" disabled={!!busy}
+                        onClick={async () => {
+                          if (await action(`comments/${c.id}`, 'DELETE')) notify('Comentario retirado.');
+                        }}><Trash2 size={14} /> Retirar comentario</button>
+                    )}
                   </div>
                 </div>
               ))
@@ -333,7 +339,7 @@ export default function ReportDetail({
             {error}
           </div>
         )}
-        {r.own && (
+        {(r.own || user?.role === "admin") && (
           <div className="delete-area">
             {confirm ? (
               <div>
@@ -358,7 +364,7 @@ export default function ReportDetail({
               </div>
             ) : (
               <button onClick={() => setConfirm(true)}>
-                <Trash2 size={15} /> Eliminar mi reporte
+                <Trash2 size={15} /> Eliminar reporte
               </button>
             )}
           </div>

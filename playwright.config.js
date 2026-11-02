@@ -15,7 +15,7 @@ export default defineConfig({
       : {},
   },
   webServer: {
-    command: "node scripts/dev.mjs --port 5175 --strictPort",
+    command: "node tests/browser-server.mjs",
     url: "http://localhost:5175/api/health",
     reuseExistingServer: false,
     timeout: 30000,
