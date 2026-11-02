@@ -2,7 +2,11 @@
 
 Configuración implementada: **Render Free → Express → Firestore Spark**, con **Cloudinary Free** para las fotografías. El APK y la web utilizan la misma API HTTPS. La computadora personal puede estar apagada y el celular puede usar datos móviles.
 
-El código está preparado, pero crear cuentas y configurar los secretos no publica el servicio por sí solo. La URL debe obtenerse de un despliegue real en Render; no se ha inventado una dirección ni se incluyeron claves en el APK.
+Servicio publicado el 2 de noviembre de 2026: **https://alertavecinal-guadalupe.onrender.com**. Render confirmó el plan Free y la API respondió con Firestore. La cuenta se conectó mediante Render CLI porque el conector instalado devolvió un error de vínculo. El servicio usa la rama `codex/render-free-guadalupe-20261102`.
+
+**Pendiente:** crear Cloudinary Free y configurar sus claves. El servicio está temporalmente con `PHOTO_PROVIDER=none`: funcionan el acceso y los reportes sin fotografías nuevas. No se modificó la facturación de Firebase ni se verificó su plan desde la consola; comprueba que sea Spark para mantener el objetivo de costo cero.
+
+El APK actualizado usa la URL pública predeterminada y migra una vez las antiguas direcciones privadas. Las claves de Firebase se proporcionaron mediante un archivo secreto de Render, fuera del repositorio y del APK.
 
 ## 1. Crear Cloudinary Free
 
@@ -27,7 +31,11 @@ Para Render se necesita una cuenta de servicio con acceso a Firestore en ese pro
 
 Las fotos antiguas que estén en Firebase Storage no se migran automáticamente. Se conservan sus referencias y el proveedor anterior sigue disponible si configuras su bucket. Cambiar el plan de Firebase puede afectar ese almacenamiento; revisa y exporta las fotos antiguas antes de hacer ese cambio. Los nuevos reportes con Cloudinary no necesitan un bucket Firebase.
 
-## 3. Desplegar en Render Free
+## 3. Configurar el servicio publicado o reproducir el despliegue
+
+**Para el servicio ya publicado**, abre https://dashboard.render.com/web/srv-dbkeut142hec738me510 y usa Environment para añadir las tres claves de Cloudinary y cambiar `PHOTO_PROVIDER=cloudinary`. Guarda y despliega los cambios. No crees un segundo servicio.
+
+Para reproducir el despliegue en otra cuenta:
 
 1. Conecta tu cuenta de Render y el repositorio de AlertaVecinal.
 2. Usa **New → Blueprint** y el archivo `render.yaml` de la rama con estos cambios. El manifiesto fija `plan: free`, no crea bases de datos de Render ni discos de pago.
@@ -50,13 +58,13 @@ La compilación usa `npm ci --include=dev && npm run build`; el inicio usa `node
 
 ## 4. Conectar el celular
 
-En el APK instalado, abre **Configurar conexión**, pega la URL HTTPS real y pulsa **Comprobar y guardar**. Para incluirla en los siguientes APK, configura `VITE_API_SERVER_URL` en el `.env` local o en las variables del repositorio de GitHub y compila de nuevo:
+El APK nuevo ya incluye la dirección del servicio público y sustituye automáticamente una configuración antigua de emulador o LAN durante la primera apertura. Las direcciones de otras comunidades públicas se conservan. En un APK anterior, abre **Configurar conexión**, pega `https://alertavecinal-guadalupe.onrender.com` y pulsa **Comprobar y guardar**. `VITE_API_SERVER_URL` permite elegir otro servidor al compilar:
 
 ```powershell
 npm.cmd run android:sync
 ```
 
-Después genera e instala el APK actualizado. Una dirección guardada manualmente conserva prioridad: quien ya tenga la IP local debe cambiarla una vez.
+Después genera e instala el APK actualizado. Los cambios manuales de servidor realizados después de esa migración conservan prioridad.
 
 La conexión espera hasta 90 segundos y reintenta únicamente la comprobación de disponibilidad. No se reenvían automáticamente registros, reportes ni comentarios. La actualización automática ahora ocurre cada dos minutos mientras la pantalla está visible; el botón de actualizar sigue disponible.
 

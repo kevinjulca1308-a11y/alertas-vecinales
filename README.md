@@ -108,7 +108,7 @@ npm.cmd run android:sync
 npm.cmd run android:open
 ```
 
-Mantén `npm.cmd run dev` abierto en otra terminal. El emulador se conecta a `http://10.0.2.2:3001`. Para un celular real configura la IP de tu computadora desde «Servidor Android» en la app.
+El APK actualizado se conecta por defecto a `https://alertavecinal-guadalupe.onrender.com`, sin necesitar la computadora encendida. Para probar un backend local, configura manualmente su dirección en «Configurar conexión» y mantén `npm.cmd run dev` abierto.
 
 Consulta [ANDROID.md](ANDROID.md) para los pasos completos, los requisitos de Android Studio, cómo generar el APK y configurar un servidor HTTPS. La base SQLite sigue en el backend; no está incluida dentro del APK.
 

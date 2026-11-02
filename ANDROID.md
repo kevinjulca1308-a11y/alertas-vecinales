@@ -1,3 +1,9 @@
+## Servidor público gratuito
+
+La dirección predeterminada del APK actualizado es **https://alertavecinal-guadalupe.onrender.com**. Puedes usar datos móviles sin mantener encendida la computadora. El servicio está en Render Free; la primera conexión puede tardar hasta 90 segundos. Las nuevas fotografías requieren terminar la configuración de Cloudinary. Consulta [DESPLIEGUE_GRATUITO.md](DESPLIEGUE_GRATUITO.md).
+
+Las instrucciones de servidor local que siguen son opcionales para desarrollo.
+
 # Ejecutar AlertaVecinal en Android Studio
 
 El repositorio incluye el proyecto Android de Capacitor en `android/`. La interfaz sigue hecha con React/JavaScript; la actividad Android está en Java y los plugins proporcionan cámara, galería, GPS y exportación nativa. **No necesitas ejecutar `cap init` ni `cap add android` otra vez.**
@@ -35,7 +41,7 @@ npm.cmd run dev
 1. En Android Studio abre **Tools → Device Manager**.
 2. Crea un dispositivo con Android 15/API 35 y una imagen **Google Play** o **Google APIs** (para el GPS).
 3. Selecciónalo en la barra superior y pulsa **▶ Run**.
-4. La app ya usa `http://10.0.2.2:3001` para conectarse al servidor de tu computadora. Esa dirección es especial del emulador; no es la dirección del entorno de Codex.
+4. La app usa el servidor público. Para probar el servidor de tu computadora, cambia la conexión a `http://10.0.2.2:3001`; esa dirección es especial del emulador.
 5. Crea una cuenta y publica un reporte. Usa «Servidor Android» en el menú si necesitas cambiar o comprobar la conexión.
 
 En el emulador, configura una ubicación desde **Extended Controls → Location** y envíala antes de pulsar GPS. La cámara puede mostrar la escena virtual o una webcam según la configuración del emulador. También puedes elegir una foto de la galería.

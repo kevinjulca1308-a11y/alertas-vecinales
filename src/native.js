@@ -5,7 +5,7 @@ import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
 export const isNative = () => Capacitor.isNativePlatform();
 export const DEFAULT_ANDROID_SERVER = normalizeServerUrl(
-  import.meta.env?.VITE_API_SERVER_URL || "http://10.0.2.2:3001",
+  import.meta.env?.VITE_API_SERVER_URL || "https://alertavecinal-guadalupe.onrender.com",
 );
 export function normalizeServerUrl(value) {
   const url = new URL(value.trim());
@@ -24,11 +24,27 @@ export function normalizeServerUrl(value) {
     .replace(/\/+$/, "")
     .replace(/\/api$/, "");
 }
+const isLocalServer = (value) => {
+  const host = new URL(value).hostname;
+  return host === 'localhost' || host === '[::1]' || host === '0.0.0.0' || host.endsWith('.local') ||
+    /^(127\.|10\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.)/.test(host);
+};
+export function selectServerUrl(saved, shipped, previousShipped) {
+  const fallback = normalizeServerUrl(shipped);
+  const selected = saved ? normalizeServerUrl(saved) : fallback;
+  // Migrate an old LAN/emulator setting once when upgrading to a public-server build.
+  // Explicit choices made after that upgrade, and other public communities, retain priority.
+  if (previousShipped !== fallback && isLocalServer(selected) &&
+      fallback.startsWith('https://') && !isLocalServer(fallback)) return fallback;
+  return selected;
+}
 export function getServerUrl() {
   try {
-    return normalizeServerUrl(
-      localStorage.getItem("av-android-server") || DEFAULT_ANDROID_SERVER,
-    );
+    const saved = localStorage.getItem('av-android-server');
+    const selected = selectServerUrl(saved, DEFAULT_ANDROID_SERVER, localStorage.getItem('av-server-default'));
+    localStorage.setItem('av-server-default', DEFAULT_ANDROID_SERVER);
+    if (saved && selected !== normalizeServerUrl(saved)) localStorage.setItem('av-android-server', selected);
+    return selected;
   } catch {
     return DEFAULT_ANDROID_SERVER;
   }
@@ -36,6 +52,7 @@ export function getServerUrl() {
 export function setServerUrl(value) {
   const result = normalizeServerUrl(value);
   localStorage.setItem("av-android-server", result);
+  localStorage.setItem('av-server-default', DEFAULT_ANDROID_SERVER);
   return result;
 }
 export function getReportUrl(id) {
