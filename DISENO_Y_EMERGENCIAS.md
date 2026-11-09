@@ -2,6 +2,12 @@
 
 Actualización: 9 de noviembre de 2026.
 
+## Iconos y creador (1.1.1)
+
+Cada servicio tiene un pictograma vectorial propio: placa policial, casco de bomberos, ambulancia, patrulla de Serenazgo, comisaría y apoyo ante violencia. Son símbolos referenciales, no sellos oficiales, y se incluyen dentro del APK. Los accesos rápidos del inicio también muestran sus iconos.
+
+La tarjeta **Creador de la app** presenta `@kxvn04_` y abre `https://www.tiktok.com/@kxvn04_` en una pestaña externa. Tiene acentos cian y rosa, una firma visual de TikTok y un diseño adaptable al tema claro u oscuro. El inicio de sesión y el registro incluyen el mismo contacto de forma compacta. El enlace no envía mensajes ni sigue la cuenta automáticamente.
+
 ## Apariencia
 
 - Nueva base azul noche, superficies con profundidad, tarjetas de reportes más legibles, ilustración del barrio y navegación flotante en teléfonos.
@@ -30,9 +36,9 @@ Directorio consultado el 9 de noviembre de 2026. Los contactos y sus fuentes se 
 ## Entrega y verificación
 
 - `npm test`: 21 pruebas pasadas; las 2 pruebas de Firestore requieren el emulador y se omiten cuando no está disponible. No se cambió la API ni la base de datos para este rediseño.
-- `npm run test:e2e`: 7 escenarios, que incluyen persistencia, navegación, emergencias sin API, restauración de preferencias, administración y pantallas de 320 a 1440 píxeles.
+- `npm run test:e2e`: 8 escenarios, que incluyen persistencia, navegación, emergencias sin API, restauración de preferencias, administración, iconos y contacto del creador en pantallas de 320 a 1440 píxeles.
 - Las pruebas de llamadas verifican los enlaces, sin realizar llamadas reales.
-- Android: versión 1.1.0 (código 2), fondo y barras de arranque oscuros. La entrega es un APK de depuración para probar el diseño.
+- Android: versión 1.1.1 (código 3), fondo y barras de arranque oscuros. La entrega es un APK de depuración para probar el diseño.
 
 ## Siguientes mejoras propuestas
 

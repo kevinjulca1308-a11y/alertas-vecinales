@@ -1,0 +1,15 @@
+import React from 'react';
+
+// Referential pictograms, not official institutional seals. Inline vectors remain
+// available in the Android bundle without loading images from another service.
+export default function AuthorityIcon({ service, name, className = '' }) {
+  const symbol = {
+    police: <><path d="m32 8 9 6 11 1-2 22c-2 10-10 16-18 20-8-4-16-10-18-20l-2-22 11-1Z" fill="var(--emblem-main)" /><path d="m32 15 7 5 7 1-2 16c-1 6-6 11-12 14-6-3-11-8-12-14l-2-16 7-1Z" fill="var(--emblem-deep)" /><path d="m32 22 3 7 8 1-6 5 2 8-7-4-7 4 2-8-6-5 8-1Z" fill="var(--emblem-light)" /></>,
+    fire: <><path d="M16 36c0-13 5-21 16-21s16 8 16 21" fill="var(--emblem-main)" /><path d="M28 13h8v24h-8Z" fill="var(--emblem-light)" /><path d="M15 33h34v8H15Z" fill="var(--emblem-deep)" /><path d="M11 39h42v7H11Z" fill="var(--emblem-main)" /><path d="M32 26c3 4 6 7 6 10a6 6 0 0 1-12 0c0-3 3-6 6-10Z" fill="var(--emblem-light)" /><path d="M20 47v6m24-6v6" stroke="var(--emblem-light)" strokeWidth="4" strokeLinecap="round" /></>,
+    medical: <><path d="M10 23a4 4 0 0 1 4-4h22v26H10Zm26 7h10l9 10v5H36Z" fill="var(--emblem-main)" /><path d="M40 33h5l6 7H40Z" fill="var(--emblem-deep)" /><path d="M21 24h6v6h6v6h-6v6h-6v-6h-6v-6h6Z" fill="var(--emblem-light)" /><path d="M40 24h7" stroke="var(--emblem-light)" strokeWidth="5" strokeLinecap="round" /><circle cx="20" cy="46" r="6" fill="var(--emblem-deep)" /><circle cx="45" cy="46" r="6" fill="var(--emblem-deep)" /><circle cx="20" cy="46" r="2.5" fill="var(--emblem-light)" /><circle cx="45" cy="46" r="2.5" fill="var(--emblem-light)" /></>,
+    serenazgo: <><path d="m15 34 6-13h22l7 13 6 4v10H8V38Z" fill="var(--emblem-main)" /><path d="m24 25-4 9h23l-4-9Z" fill="var(--emblem-deep)" /><path d="M27 15h10v5H27Z" fill="var(--emblem-light)" /><path d="M31 8v3m-11 0 3 3m21-3-3 3" stroke="var(--emblem-light)" strokeWidth="3" strokeLinecap="round" /><path d="M11 39h9m24 0h9" stroke="var(--emblem-light)" strokeWidth="3" /><circle cx="18" cy="48" r="6" fill="var(--emblem-deep)" /><circle cx="46" cy="48" r="6" fill="var(--emblem-deep)" /><path d="m32 36 5 2v5l-5 4-5-4v-5Z" fill="var(--emblem-light)" /></>,
+    station: <><path d="M14 27h36v27H14Z" fill="var(--emblem-main)" /><path d="m10 27 22-13 22 13Z" fill="var(--emblem-light)" /><path d="M27 39h10v15H27Zm-8-7h7v6h-7Zm19 0h7v6h-7Z" fill="var(--emblem-deep)" /><path d="M32 5v9" stroke="var(--emblem-light)" strokeWidth="3" strokeLinecap="round" /><path d="M34 5h12v7H34Z" fill="var(--emblem-main)" /><path d="M10 55h44" stroke="var(--emblem-light)" strokeWidth="3" strokeLinecap="round" /></>,
+    violence: <><path d="M32 37S17 28 17 20c0-8 10-11 15-4 5-7 15-4 15 4 0 8-15 17-15 17Z" fill="var(--emblem-main)" /><path d="m9 36 7-4 11 9h10l11-9 7 4-13 18H22Z" fill="var(--emblem-light)" /><path d="m22 38 10 8 10-8" stroke="var(--emblem-deep)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" /></>,
+  };
+  return <span role="img" aria-label={`Icono de ${name}`} className={`authority-icon authority-${service} ${className}`}><svg viewBox="0 0 64 64" fill="none" aria-hidden="true" focusable="false">{symbol[service]}</svg></span>;
+}

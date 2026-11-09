@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, LoaderCircle, Eye, EyeOff, Mail, LockKeyhole, UserRound, AlertTriangle, MapPin, CheckCircle2, Users, ShieldCheck } from 'lucide-react';
 import { api } from './api';
+import { CreatorCredit } from './CreatorCard';
 
 export default function AuthForm({ mode = 'login', onModeChange, onBack, onSuccess, appearance, connection }) {
   const [form, setForm] = useState({ name: '', email: '', password: '' });
@@ -70,6 +71,6 @@ export default function AuthForm({ mode = 'login', onModeChange, onBack, onSucce
         </div>
       </section>
     </main>
-    <footer className="auth-footer"><span>AlertaVecinal · Hogar conectado</span><span>Un barrio mejor empieza con nosotros.</span></footer>
+    <footer className="auth-footer"><span>AlertaVecinal · Hogar conectado</span><CreatorCredit /></footer>
   </div>;
 }

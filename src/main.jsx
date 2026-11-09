@@ -16,6 +16,7 @@ import ServerSettings from './ServerSettings';
 import AppearancePanel, { ThemePicker, useAppearance } from './Appearance';
 import EmergencyHelp, { EmergencyStrip } from './EmergencyHelp';
 import NeighborhoodArt from './NeighborhoodArt';
+import CreatorCard from './CreatorCard';
 
 const neighborNav = [['Inicio', LayoutDashboard], ['Mapa', Map], ['Mis reportes', FileText], ['Guardados', Bookmark]];
 const adminNav = [['Resumen', LayoutDashboard], ['Reportes', FileText], ['Usuarios', Users]];
@@ -213,6 +214,7 @@ function App() {
             </>}
           </>}
         </>}
+        <CreatorCard />
         <footer className="app-footer"><span>AlertaVecinal<span> · </span>Hogar conectado</span><span>Construimos comunidad, reporte a reporte.</span></footer>
       </main>
     </div>

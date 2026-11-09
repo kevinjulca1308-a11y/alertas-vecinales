@@ -405,3 +405,87 @@ h1 { font-size: clamp(26px, 2.2vw, 34px); }
   .emergency-description { font-size: 9px; }
   .theme-options > button > span:last-child > svg:last-child:not(:first-child) { display: none; }
 }
+
+/* Distinct, locally bundled symbols for each public service. */
+.authority-icon { --emblem-main: #80b8ff; --emblem-deep: #24466d; --emblem-light: #ffdc89; display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 17px; padding: 4px; flex-shrink: 0; background: color-mix(in srgb, var(--emblem-main) 12%, var(--surface)); border: 1px solid color-mix(in srgb, var(--emblem-main) 25%, var(--border)); }
+.authority-icon svg { width: 100%; height: 100%; display: block; }
+.authority-fire { --emblem-main: #ff887b; --emblem-deep: #773749; --emblem-light: #ffe09a; }
+.authority-medical { --emblem-main: #75dec0; --emblem-deep: #16524d; --emblem-light: #e4fff8; }
+.authority-serenazgo { --emblem-main: #c2a3fc; --emblem-deep: #4e3678; --emblem-light: #a6edf1; }
+.authority-station { --emblem-main: #8abbff; --emblem-deep: #24466d; --emblem-light: #deedff; }
+.authority-violence { --emblem-main: #f695b9; --emblem-deep: #803655; --emblem-light: #ffd2e2; }
+:root[data-theme='light'] .authority-police { --emblem-main: #3f7bbd; --emblem-deep: #193d65; --emblem-light: #ffd171; }
+:root[data-theme='light'] .authority-fire { --emblem-main: #d95448; --emblem-deep: #6e2935; --emblem-light: #ffd278; }
+:root[data-theme='light'] .authority-medical { --emblem-main: #16836c; --emblem-deep: #124e49; --emblem-light: #e0fff2; }
+:root[data-theme='light'] .authority-serenazgo { --emblem-main: #8353bf; --emblem-deep: #432a6c; --emblem-light: #8ce0e8; }
+:root[data-theme='light'] .authority-station { --emblem-main: #3f7bbd; --emblem-deep: #193d65; --emblem-light: #d6e9ff; }
+:root[data-theme='light'] .authority-violence { --emblem-main: #c74b81; --emblem-deep: #803655; --emblem-light: #df9fbd; }
+.emergency-contact > .authority-icon { margin-bottom: 18px; }
+.emergency-quick-links a { grid-template-columns: 34px auto 13px; gap: 0 8px; }
+.emergency-quick-links .authority-icon { width: 34px; height: 36px; border-radius: 10px; padding: 2px; grid-column: 1; grid-row: 1 / 3; }
+.emergency-quick-links a > strong { grid-column: 2; grid-row: 1; }
+.emergency-quick-links a > span:not(.authority-icon) { grid-column: 2; grid-row: 2; }
+.emergency-quick-links a > svg { grid-column: 3; }
+
+/* Creator identity: a small neon signature that works in all appearance modes. */
+.creator-card { position: relative; isolation: isolate; display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; align-items: center; gap: 22px; margin-top: 38px; padding: 27px 28px; border-radius: 22px; border: 1px solid color-mix(in srgb, #c06bab 30%, var(--border)); overflow: hidden; background: radial-gradient(ellipse at 0 0, #28d9d015, transparent 58%), radial-gradient(ellipse at 100% 100%, #ec568f15, transparent 65%), var(--surface); }
+.creator-card::before { content: ''; position: absolute; inset: 0 30px auto; height: 1px; background: linear-gradient(90deg, transparent, #63d5d799, #de699c99, transparent); pointer-events: none; }
+.creator-card::after { content: ''; position: absolute; width: 230px; height: 230px; border: 1px solid color-mix(in srgb, #d06fa9 10%, transparent); border-radius: 50%; right: -100px; top: -130px; box-shadow: 0 0 0 25px color-mix(in srgb, #d06fa9 3%, transparent), 0 0 0 50px color-mix(in srgb, #d06fa9 2%, transparent); pointer-events: none; z-index: -1; }
+.creator-avatar { width: 72px; height: 76px; display: grid; place-items: center; position: relative; background: #0a1020; border: 1px solid #556075; border-radius: 22px; box-shadow: -5px 5px 22px #2de2e613, 5px -5px 22px #f34a8b13; transform: rotate(-6deg); }
+.tiktok-symbol { width: 24px; height: 24px; flex-shrink: 0; }
+.creator-avatar > .tiktok-symbol { width: 37px; height: 37px; color: #fff; filter: drop-shadow(-2px -1px 0 #25d6d4) drop-shadow(2px 2px 0 #f44979); transform: rotate(6deg); }
+.creator-avatar > span { position: absolute; right: -6px; bottom: -5px; background: var(--surface); color: var(--primary-text); border: 1px solid var(--border); width: 25px; height: 25px; border-radius: 8px; display: grid; place-items: center; transform: rotate(6deg); }
+.creator-copy { min-width: 0; }
+.creator-eyebrow { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 8px; letter-spacing: 1.8px; font-weight: 650; margin-bottom: 6px; }
+.creator-eyebrow i { width: 5px; height: 5px; background: #ef8eba; border-radius: 50%; }
+.creator-copy h2 { margin: 0 0 6px; font-size: 29px; line-height: 1.2; letter-spacing: -1px; color: var(--ink); }
+.creator-copy p { font-size: 11px; line-height: 1.7; margin-bottom: 0; max-width: 360px; }
+.creator-link { display: inline-flex; align-items: center; justify-content: center; gap: 13px; min-height: 58px; padding: 12px 17px; border: 1px solid color-mix(in srgb, #c570ad 45%, var(--border)); background: linear-gradient(120deg, var(--surface-2), color-mix(in srgb, #bc598d 10%, var(--surface-2))); border-radius: 14px; position: relative; transition: border-color .2s, transform .2s; }
+.creator-link:hover { border-color: #c570ad; transform: translateY(-2px); }
+.creator-link > .tiktok-symbol { color: var(--ink); }
+.creator-link > span { font-size: 12px; font-weight: 650; }
+.creator-link small { display: block; font-size: 7px; letter-spacing: 1.7px; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
+.creator-link > svg:last-child { color: var(--muted); margin-left: 7px; }
+.creator-credit { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; min-height: 36px; color: var(--muted); }
+.creator-credit > .tiktok-symbol { width: 16px; height: 16px; color: var(--ink); }
+.creator-credit strong { color: var(--primary-text); font-weight: 650; }
+.creator-credit:hover strong { text-decoration: underline; text-underline-offset: 4px; }
+.creator-card + .app-footer { margin-top: 24px; }
+:root[data-text='large'] .creator-copy p, :root[data-text='large'] .creator-link > span { font-size: 15px; }
+@media (max-width: 1200px) {
+  .emergency-quick-links { gap: 15px; }
+  .emergency-quick-links a { gap: 0 6px; grid-template-columns: 30px auto; }
+  .emergency-quick-links .authority-icon { width: 30px; height: 33px; }
+  .emergency-quick-links a > svg { display: none; }
+  .creator-card { grid-template-columns: 62px minmax(0, 1fr) auto; padding: 25px 22px; gap: 18px; }
+  .creator-avatar { width: 62px; height: 68px; border-radius: 19px; }
+  .creator-copy h2 { font-size: 26px; }
+  .creator-link { gap: 10px; padding-inline: 13px; }
+}
+@media (max-width: 760px) {
+  .emergency-quick-links a { grid-template-columns: 1fr 14px; padding: 11px 12px; gap: 0 4px; }
+  .emergency-quick-links .authority-icon { grid-column: 1 / -1; grid-row: 1; width: 32px; height: 33px; margin-bottom: 9px; border-radius: 10px; }
+  .emergency-quick-links a > strong { grid-column: 1; grid-row: 2; }
+  .emergency-quick-links a > span:not(.authority-icon) { grid-column: 1; grid-row: 3; }
+  .emergency-quick-links a > svg { display: block; grid-column: 2; grid-row: 2 / 4; width: 13px; }
+  .emergency-contact > .authority-icon { width: 44px; height: 46px; padding: 3px; border-radius: 13px; margin-bottom: 15px; }
+  .secondary-contacts .emergency-contact { grid-template-columns: 44px 1fr auto; gap: 0 10px; }
+  .secondary-contacts .authority-icon { grid-column: 1; grid-row: 1 / 4; margin-bottom: 0; }
+  .creator-card { grid-template-columns: 60px minmax(0, 1fr); gap: 19px 18px; margin-top: 31px; padding: 24px 22px; border-radius: 21px; }
+  .creator-avatar { width: 60px; height: 65px; }
+  .creator-avatar > .tiktok-symbol { width: 33px; height: 33px; }
+  .creator-eyebrow { font-size: 7px; letter-spacing: 1.3px; }
+  .creator-copy h2 { font-size: 27px; }
+  .creator-copy p { font-size: 11px; }
+  .creator-link { grid-column: 1 / -1; justify-content: flex-start; min-height: 54px; padding: 12px 17px; gap: 14px; }
+  .creator-link > svg:last-child { margin-left: auto; }
+  .auth-footer { flex-wrap: wrap; gap: 7px 20px; }
+  .auth-footer .creator-credit { display: inline-flex; }
+}
+@media (max-width: 360px) {
+  .emergency-quick-links a { padding-inline: 9px; }
+  .creator-card { padding: 22px 18px; gap: 16px; grid-template-columns: 50px minmax(0, 1fr); }
+  .creator-avatar { width: 50px; height: 59px; border-radius: 17px; }
+  .creator-copy h2 { font-size: 24px; }
+  .creator-copy p { font-size: 10px; }
+}
