@@ -6,7 +6,8 @@
     "androidScheme": "https"
   },
   "android": {
-    "backgroundColor": "#203d31"
+    "backgroundColor": "#080f1d",
+    "adjustMarginsForEdgeToEdge": "auto"
   },
   "loggingBehavior": "none"
 }

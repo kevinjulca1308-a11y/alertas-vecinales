@@ -3,14 +3,14 @@ import assert from "node:assert/strict";
 import { filterReports, seedReports } from "../src/data.js";
 test("search combines category and status and ignores accents and spaces", () => {
   const result = filterReports(seedReports, {
-    search: " GALVEZ ",
+    search: " SECTOR DE EJÉMPLO 2 ",
     category: "Limpieza",
     status: "En proceso",
   });
   assert.equal(result.length, 1);
   assert.equal(result[0].id, "AV-1047");
   assert.equal(
-    filterReports(seedReports, { search: "galvez", status: "Resuelto" }).length,
+    filterReports(seedReports, { search: "sector de ejemplo 2", status: "Resuelto" }).length,
     0,
   );
 });

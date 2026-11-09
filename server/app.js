@@ -8,8 +8,9 @@ import {
 } from "node:crypto";
 import { promisify } from "node:util";
 import { resolve } from "node:path";
-import { openDatabase, presentReport } from "./database.js";
+import { sqliteStore } from "./sqlite-store.js";
 import { categories, statuses } from "../src/data.js";
+import { photoUploadsDisabled, PHOTO_UPLOADS_DISABLED_MESSAGE } from './errors.js';
 const derive = promisify(scrypt),
   digest = (value) => createHash("sha256").update(value).digest("hex");
 const failure = (status, message) =>
@@ -23,21 +24,22 @@ const text = (value, min, max, label) => {
     throw failure(400, `${label}: usa entre ${min} y ${max} caracteres.`);
   return value.trim();
 };
-const publicUser = (row) => ({ id: row.id, name: row.name, email: row.email });
+const publicUser = (row) => ({ id: row.id, name: row.name, email: row.email, role: row.role === 'admin' ? 'admin' : 'user' });
 export function createApp({
-  db = openDatabase(process.env.DB_PATH),
+  db,
+  store = sqliteStore(db),
   secureCookies = process.env.NODE_ENV === "production",
   serveStatic = true,
 } = {}) {
   const app = express();
   app.disable("x-powered-by");
-  app.use((req, res, next) => {
+  app.use(async (req, res, next) => {
     res.set("X-Content-Type-Options", "nosniff");
     res.set("X-Frame-Options", "DENY");
     res.set("Referrer-Policy", "strict-origin-when-cross-origin");
     next();
   });
-  app.use("/api", (req, res, next) => {
+  app.use("/api", async (req, res, next) => {
     res.set("Cache-Control", "no-store");
     if (
       !["GET", "HEAD", "OPTIONS"].includes(req.method) &&
@@ -55,19 +57,15 @@ export function createApp({
     next();
   });
   app.use(express.json({ limit: "5mb" }));
-  app.use("/api", (req, res, next) => {
+  app.use("/api", async (req, res, next) => {
     const cookie = req.headers.cookie
       ?.split(";")
       .map((c) => c.trim())
       .find((c) => c.startsWith("av_session="))
       ?.slice(11);
     if (cookie) {
-      const session = db
-        .prepare(
-          "SELECT u.* FROM sessions s JOIN users u ON s.user_id=u.id WHERE token_hash=? AND expires_at>?",
-        )
-        .get(digest(cookie), Date.now());
-      if (session) req.user = session;
+      const session = await store.getSession(digest(cookie), Date.now());
+      if (session && session.status !== 'suspended') req.user = session;
     }
     next();
   });
@@ -75,8 +73,10 @@ export function createApp({
     req.user
       ? next()
       : res.status(401).json({ error: "Inicia sesión para participar." });
+  const admin = (req, res, next) => req.user?.role === 'admin'
+    ? next() : res.status(403).json({ error: 'Acceso exclusivo para administradores.' });
   const rate = new Map();
-  const authRate = (req, res, next) => {
+  const authRate = async (req, res, next) => {
     const key = req.ip;
     const now = Date.now();
     const entry = rate.get(key);
@@ -91,14 +91,9 @@ export function createApp({
       for (const [k, v] of rate) if (now - v.start >= 600000) rate.delete(k);
     next();
   };
-  const session = (res, user) => {
+  const session = async (res, user) => {
     const token = randomBytes(32).toString("hex");
-    db.prepare("DELETE FROM sessions WHERE expires_at<=?").run(Date.now());
-    db.prepare("INSERT INTO sessions VALUES(?,?,?)").run(
-      digest(token),
-      user.id,
-      Date.now() + 7 * 86400000,
-    );
+    await store.createSession(digest(token), user.id, Date.now() + 7 * 86400000);
     res.cookie("av_session", token, {
       httpOnly: true,
       sameSite: "lax",
@@ -109,8 +104,9 @@ export function createApp({
     res.json({ user: publicUser(user) });
   };
   app.get("/api/health", (_, res) =>
-    res.json({ ok: true, database: "SQLite" }),
+    res.json({ ok: true, database: store.name }),
   );
+  app.get('/api/capabilities', (_, res) => res.json({ photoUploads: store.photoUploads !== false }));
   app.get("/api/me", (req, res) =>
     res.json({ user: req.user ? publicUser(req.user) : null }),
   );
@@ -121,19 +117,13 @@ export function createApp({
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
         throw failure(400, "Escribe un correo válido.");
       const password = text(req.body.password, 8, 128, "Contraseña");
-      if (db.prepare("SELECT id FROM users WHERE email=?").get(email))
+      if (await store.findUser(email))
         throw failure(409, "Ese correo ya tiene una cuenta. Inicia sesión.");
       const salt = randomBytes(16).toString("hex");
       const key = await derive(password, salt, 64);
       const user = { id: randomUUID(), name, email };
-      db.prepare("INSERT INTO users VALUES(?,?,?,?,?)").run(
-        user.id,
-        name,
-        email,
-        `${salt}:${key.toString("hex")}`,
-        new Date().toISOString(),
-      );
-      session(res, user);
+      await store.createUser({ ...user, password_hash: `${salt}:${key.toString("hex")}`, created_at: new Date().toISOString() });
+      await session(res, user);
     } catch (e) {
       next(e);
     }
@@ -142,26 +132,27 @@ export function createApp({
     try {
       const email = text(req.body.email, 5, 160, "Correo").toLowerCase(),
         password = text(req.body.password, 1, 128, "Contraseña");
-      const user = db.prepare("SELECT * FROM users WHERE email=?").get(email);
+      const user = await store.findUser(email);
       const [salt, hash] = (
         user?.password_hash || `${"0".repeat(32)}:${"0".repeat(128)}`
       ).split(":");
       const key = await derive(password, salt, 64);
       if (!user || !timingSafeEqual(key, Buffer.from(hash, "hex")))
         throw failure(401, "Correo o contraseña incorrectos.");
-      session(res, user);
+      if (user.status === 'suspended') throw failure(403, 'Tu cuenta está suspendida. Contacta al administrador.');
+      await session(res, user);
     } catch (e) {
       next(e);
     }
   });
-  app.post("/api/auth/logout", (req, res) => {
+  app.post("/api/auth/logout", async (req, res) => {
     const token = req.headers.cookie
       ?.split(";")
       .map((c) => c.trim())
       .find((c) => c.startsWith("av_session="))
       ?.slice(11);
     if (token)
-      db.prepare("DELETE FROM sessions WHERE token_hash=?").run(digest(token));
+      await store.deleteSession(digest(token));
     res.clearCookie("av_session", {
       path: "/",
       secure: secureCookies,
@@ -169,33 +160,30 @@ export function createApp({
     });
     res.json({ ok: true });
   });
-  const getReport = (id) => {
-    const row = db.prepare("SELECT * FROM reports WHERE id=?").get(id);
+  const getReport = async (id) => {
+    const row = await store.getReport(id);
     if (!row) throw failure(404, "El reporte ya no está disponible.");
     return row;
   };
   const own = (row, user) => {
-    if (row.owner_id !== user.id || row.demo)
+    if (user.role !== "admin" && (row.owner_id !== user.id || row.demo))
       throw failure(403, "Solo puedes gestionar tus propios reportes.");
   };
-  app.get("/api/reports", (req, res) => {
+  app.get("/api/reports", async (req, res) => {
     res.json({
-      reports: db
-        .prepare("SELECT * FROM reports ORDER BY created_at DESC")
-        .all()
-        .map((r) => presentReport(db, r, req.user?.id)),
+      reports: await Promise.all((await store.listReports()).map((r) => store.present(r, req.user?.id))),
     });
   });
-  app.get("/api/reports/:id", (req, res, next) => {
+  app.get("/api/reports/:id", async (req, res, next) => {
     try {
       res.json({
-        report: presentReport(db, getReport(req.params.id), req.user?.id),
+        report: await store.present(await getReport(req.params.id), req.user?.id),
       });
     } catch (e) {
       next(e);
     }
   });
-  app.post("/api/reports", required, (req, res, next) => {
+  app.post("/api/reports", required, async (req, res, next) => {
     try {
       const v = req.body,
         title = text(v.title, 5, 100, "Título"),
@@ -230,77 +218,41 @@ export function createApp({
         if (bytes[0] !== 255 || bytes[1] !== 216 || bytes[2] !== 255)
           throw failure(400, "La foto no es un JPEG válido.");
       }
+      if (photos.length && store.photoUploads === false) throw photoUploadsDisabled();
       const id = `AV-${randomBytes(5).toString("hex").toUpperCase()}`,
         date = new Date().toISOString();
-      db.exec("BEGIN");
-      try {
-        db.prepare(
-          "INSERT INTO reports VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-        ).run(
-          id,
-          req.user.id,
-          title,
-          v.category,
-          description,
-          address,
-          v.lat,
-          v.lng,
-          "Reportado",
-          v.priority,
-          JSON.stringify(photos),
-          date,
-          0,
-          null,
-          0,
-        );
-        db.prepare(
-          "INSERT INTO history(report_id,status,note,created_at) VALUES(?,?,?,?)",
-        ).run(id, "Reportado", "Reporte creado por el vecino", date);
-        db.exec("COMMIT");
-      } catch (e) {
-        db.exec("ROLLBACK");
-        throw e;
-      }
+      await store.createReport({
+        id, owner_id: req.user.id, title, category: v.category, description, address,
+        lat: v.lat, lng: v.lng, status: "Reportado", priority: v.priority,
+        photos, created_at: date,
+      });
       res
         .status(201)
-        .json({ report: presentReport(db, getReport(id), req.user.id) });
+        .json({ report: await store.present(await getReport(id), req.user.id) });
     } catch (e) {
       next(e);
     }
   });
-  app.patch("/api/reports/:id/status", required, (req, res, next) => {
+  app.patch("/api/reports/:id/status", required, async (req, res, next) => {
     try {
-      const row = getReport(req.params.id);
+      const row = await getReport(req.params.id);
       own(row, req.user);
       if (!statuses.includes(req.body.status))
         throw failure(400, "Estado inválido.");
       const note = text(req.body.note, 5, 500, "Nota de seguimiento");
       if (row.status === req.body.status)
         throw failure(409, "Selecciona un estado diferente al actual.");
-      db.exec("BEGIN");
-      try {
-        db.prepare("UPDATE reports SET status=? WHERE id=?").run(
-          req.body.status,
-          row.id,
-        );
-        db.prepare(
-          "INSERT INTO history(report_id,status,note,created_at) VALUES(?,?,?,?)",
-        ).run(row.id, req.body.status, note, new Date().toISOString());
-        db.exec("COMMIT");
-      } catch (e) {
-        db.exec("ROLLBACK");
-        throw e;
-      }
-      res.json({ report: presentReport(db, getReport(row.id), req.user.id) });
+      await store.updateStatus(row.id, req.user.id, req.body.status, req.user.role === "admin" ? `Administración: ${note}` : note, new Date().toISOString());
+      res.json({ report: await store.present(await getReport(row.id), req.user.id) });
     } catch (e) {
       next(e);
     }
   });
-  app.delete("/api/reports/:id", required, (req, res, next) => {
+  app.delete("/api/reports/:id", required, async (req, res, next) => {
     try {
-      const row = getReport(req.params.id);
+      const row = await getReport(req.params.id);
       own(row, req.user);
-      db.prepare("DELETE FROM reports WHERE id=?").run(row.id);
+      await store.deleteReport(row.id, req.user.id);
       res.json({ ok: true });
     } catch (e) {
       next(e);
@@ -310,46 +262,50 @@ export function createApp({
     ["support", "votes"],
     ["save", "bookmarks"],
   ])
-    app.put(`/api/reports/:id/${action}`, required, (req, res, next) => {
+    app.put(`/api/reports/:id/${action}`, required, async (req, res, next) => {
       try {
-        getReport(req.params.id);
+        await getReport(req.params.id);
         if (typeof req.body.active !== "boolean")
           throw failure(400, "Acción inválida.");
-        if (req.body.active)
-          db.prepare(`INSERT OR IGNORE INTO ${table} VALUES(?,?)`).run(
-            req.params.id,
-            req.user.id,
-          );
-        else
-          db.prepare(
-            `DELETE FROM ${table} WHERE report_id=? AND user_id=?`,
-          ).run(req.params.id, req.user.id);
+        await store.toggle(req.params.id, req.user.id, table, req.body.active);
         res.json({
-          report: presentReport(db, getReport(req.params.id), req.user.id),
+          report: await store.present(await getReport(req.params.id), req.user.id),
         });
       } catch (e) {
         next(e);
       }
     });
-  app.post("/api/reports/:id/comments", required, (req, res, next) => {
+  app.post("/api/reports/:id/comments", required, async (req, res, next) => {
     try {
-      getReport(req.params.id);
+      await getReport(req.params.id);
       const body = text(req.body.body, 3, 600, "Comentario");
-      db.prepare("INSERT INTO comments VALUES(?,?,?,?,?)").run(
-        randomUUID(),
-        req.params.id,
-        req.user.id,
-        body,
-        new Date().toISOString(),
-      );
+      await store.addComment(req.params.id, {
+        id: randomUUID(), user_id: req.user.id, body, created_at: new Date().toISOString(),
+      });
       res
         .status(201)
         .json({
-          report: presentReport(db, getReport(req.params.id), req.user.id),
+          report: await store.present(await getReport(req.params.id), req.user.id),
         });
     } catch (e) {
       next(e);
     }
+  });
+  app.get('/api/admin/users', required, admin, async (req, res) => {
+    res.json({ users: (await store.listUsers()).map(({ password_hash, ...u }) => u) });
+  });
+  app.patch('/api/admin/users/:id/status', required, admin, async (req, res) => {
+    const target = await store.getUser(req.params.id);
+    if (!target) throw failure(404, 'El usuario no existe.');
+    if (!['active', 'suspended'].includes(req.body.status)) throw failure(400, 'Estado inválido.');
+    if (target.id === req.user.id || target.role === 'admin') throw failure(403, 'No puedes suspender una cuenta administradora.');
+    await store.setUserStatus(target.id, req.body.status);
+    res.json({ ok: true });
+  });
+  app.delete('/api/reports/:id/comments/:commentId', required, admin, async (req, res) => {
+    const row = await getReport(req.params.id);
+    await store.deleteComment(row.id, req.params.commentId);
+    res.json({ report: await store.present(await getReport(row.id), req.user.id) });
   });
   app.use("/api", (_, res) =>
     res.status(404).json({ error: "Operación no disponible." }),
@@ -361,6 +317,7 @@ export function createApp({
   app.use((err, req, res, next) => {
     if (res.headersSent) return next(err);
     const status = err.status || 500;
+    const photosDisabled = err.code === 'PHOTO_UPLOADS_DISABLED';
     if (status >= 500) console.error("API error:", err.message);
     res
       .status(status)
@@ -368,9 +325,12 @@ export function createApp({
         error:
           status === 413
             ? "El archivo es demasiado grande."
+            : photosDisabled
+              ? PHOTO_UPLOADS_DISABLED_MESSAGE
             : status >= 500
               ? "No se pudo completar la operación. Inténtalo nuevamente."
               : err.message,
+        ...(photosDisabled ? { code: 'PHOTO_UPLOADS_DISABLED' } : {}),
       });
   });
   return app;

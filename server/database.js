@@ -13,6 +13,7 @@ export function openDatabase(path = resolve("data/alertavecinal.sqlite")) {
  CREATE TABLE IF NOT EXISTS comments(id TEXT PRIMARY KEY, report_id TEXT NOT NULL REFERENCES reports(id) ON DELETE CASCADE, user_id TEXT NOT NULL REFERENCES users(id), body TEXT NOT NULL, created_at TEXT NOT NULL);
  CREATE TABLE IF NOT EXISTS votes(report_id TEXT NOT NULL REFERENCES reports(id) ON DELETE CASCADE, user_id TEXT NOT NULL REFERENCES users(id), PRIMARY KEY(report_id,user_id));
  CREATE TABLE IF NOT EXISTS bookmarks(report_id TEXT NOT NULL REFERENCES reports(id) ON DELETE CASCADE, user_id TEXT NOT NULL REFERENCES users(id), PRIMARY KEY(report_id,user_id));
+ CREATE TABLE IF NOT EXISTS user_access(user_id TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE, role TEXT NOT NULL DEFAULT 'user' CHECK(role IN ('user','admin')), status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active','suspended')));
  CREATE INDEX IF NOT EXISTS reports_created ON reports(created_at);
  CREATE INDEX IF NOT EXISTS comments_report ON comments(report_id);
  `);

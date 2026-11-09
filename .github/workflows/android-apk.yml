@@ -47,6 +47,8 @@ jobs:
           npm test
 
       - name: Compilar React y sincronizar Android
+        env:
+          VITE_API_SERVER_URL: ${{ vars.VITE_API_SERVER_URL }}
         run: npm run android:sync
 
       - name: Compilar el APK
@@ -78,6 +80,6 @@ jobs:
           ### APK de AlertaVecinal generado
           Descarga **AlertaVecinal-Android** desde la sección **Artifacts** de esta ejecución y descomprime el ZIP.
           El archivo **AlertaVecinal-debug.apk** es una app de prueba; no requiere abrir Android Studio para instalarlo.
-          La app necesita el servidor Node.js/SQLite encendido. En el emulador usa `http://10.0.2.2:3001`; en un celular configura la IP de tu computadora desde **Servidor Android**.
+          Para usar datos móviles, configura la variable del repositorio **VITE_API_SERVER_URL** con la URL HTTPS real de la API y vuelve a ejecutar este workflow. El hosting debe estar publicado; Firebase por sí solo no aloja Express. Consulta **DESPLIEGUE_HTTPS.md**.
           Esta compilación no ejecuta un emulador ni publica la app en Google Play. Consulta **ANDROID.md** en el repositorio para probar cámara, GPS y conexión.
           EOF_SUMMARY

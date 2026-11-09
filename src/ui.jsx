@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import L from "leaflet";
+import { community } from "./community";
 import {
   X,
   MapPin,
@@ -179,7 +180,7 @@ export function MapView({
       zoomAnimation: false,
       fadeAnimation: false,
       markerZoomAnimation: false,
-    }).setView(position || [-12.118, -77.031], 14);
+    }).setView(position || community.center, community.zoom);
     map.current = m;
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution:

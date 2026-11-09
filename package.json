@@ -4,15 +4,18 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node scripts/dev.mjs",
+    "dev": "node --env-file-if-exists=.env scripts/dev.mjs",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0",
     "test": "node --test tests/*.test.js",
-    "start": "node server/index.js",
+    "start": "node --env-file-if-exists=.env server/index.js",
     "test:e2e": "playwright test",
     "android:sync": "npm run build && cap sync android",
     "android:open": "cap open android",
-    "android:prepare": "npm run android:sync && npm run android:open"
+    "android:prepare": "npm run android:sync && npm run android:open",
+    "test:firebase": "node --test tests/firebase.test.js",
+    "admin:grant": "node --env-file-if-exists=.env server/grant-admin.js",
+    "photos:cleanup": "node --env-file-if-exists=.env server/cleanup-photos.js"
   },
   "dependencies": {
     "@capacitor/android": "^7.6.9",
@@ -21,7 +24,9 @@
     "@capacitor/filesystem": "^7.1.9",
     "@capacitor/geolocation": "^7.1.8",
     "@capacitor/share": "^7.0.4",
+    "cloudinary": "^2.11.0",
     "express": "^5.3.0",
+    "firebase-admin": "^14.5.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.468.0",
     "react": "^19.0.0",
