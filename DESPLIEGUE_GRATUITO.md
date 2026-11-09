@@ -10,6 +10,12 @@ El APK actualizado usa la URL pública predeterminada y migra una vez las antigu
 
 ## 1. Crear Cloudinary Free
 
+### Si aparece un error al adjuntar fotos
+
+Mientras `PHOTO_PROVIDER=none`, los reportes se pueden publicar con texto y ubicación, pero no con fotos. La versión 1.1.2 consulta `/api/capabilities` y avisa antes de adjuntar. Si una configuración antigua intenta enviar imágenes, la API responde con el código seguro `PHOTO_UPLOADS_DISABLED`; la pantalla conserva el borrador y ofrece **Publicar sin fotografías** únicamente por decisión de la persona. No hay reenvíos automáticos.
+
+Si se prepara un espacio mediante [Claimable Cloud](https://cloudinary.com/documentation/claimable_cloud_provisioning), la persona debe reclamarlo en su enlace privado y confirmar el correo dentro del plazo indicado. Las claves se guardan en el `.env` privado; el enlace de reclamación y su token no deben subirse al repositorio. Hasta confirmar la cuenta, se mantiene `PHOTO_PROVIDER=none` en Render: el entorno temporal tiene restricciones de entrega y vence si no se reclama. Tras la confirmación se reutilizan las mismas claves, se activa `PHOTO_PROVIDER=cloudinary` y se comprueba la entrega pública de una fotografía de prueba.
+
 Regístrate en [Cloudinary Free](https://cloudinary.com/users/register_free) y conserva el plan **Free**. En la consola abre Settings → API Keys y localiza Cloud name, API Key y API Secret. No habilites un preset de subida sin firma: este servidor autentica las subidas con el SDK oficial.
 
 Para probar en esta computadora, completa los tres campos ya preparados al final del archivo privado `.env` y agrega `PHOTO_PROVIDER=cloudinary`:

@@ -10,6 +10,7 @@ import { promisify } from "node:util";
 import { resolve } from "node:path";
 import { sqliteStore } from "./sqlite-store.js";
 import { categories, statuses } from "../src/data.js";
+import { photoUploadsDisabled, PHOTO_UPLOADS_DISABLED_MESSAGE } from './errors.js';
 const derive = promisify(scrypt),
   digest = (value) => createHash("sha256").update(value).digest("hex");
 const failure = (status, message) =>
@@ -105,6 +106,7 @@ export function createApp({
   app.get("/api/health", (_, res) =>
     res.json({ ok: true, database: store.name }),
   );
+  app.get('/api/capabilities', (_, res) => res.json({ photoUploads: store.photoUploads !== false }));
   app.get("/api/me", (req, res) =>
     res.json({ user: req.user ? publicUser(req.user) : null }),
   );
@@ -216,6 +218,7 @@ export function createApp({
         if (bytes[0] !== 255 || bytes[1] !== 216 || bytes[2] !== 255)
           throw failure(400, "La foto no es un JPEG válido.");
       }
+      if (photos.length && store.photoUploads === false) throw photoUploadsDisabled();
       const id = `AV-${randomBytes(5).toString("hex").toUpperCase()}`,
         date = new Date().toISOString();
       await store.createReport({
@@ -314,6 +317,7 @@ export function createApp({
   app.use((err, req, res, next) => {
     if (res.headersSent) return next(err);
     const status = err.status || 500;
+    const photosDisabled = err.code === 'PHOTO_UPLOADS_DISABLED';
     if (status >= 500) console.error("API error:", err.message);
     res
       .status(status)
@@ -321,9 +325,12 @@ export function createApp({
         error:
           status === 413
             ? "El archivo es demasiado grande."
+            : photosDisabled
+              ? PHOTO_UPLOADS_DISABLED_MESSAGE
             : status >= 500
               ? "No se pudo completar la operación. Inténtalo nuevamente."
               : err.message,
+        ...(photosDisabled ? { code: 'PHOTO_UPLOADS_DISABLED' } : {}),
       });
   });
   return app;

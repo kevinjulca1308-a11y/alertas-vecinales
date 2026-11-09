@@ -8,6 +8,7 @@ export function sqliteStore(db = openDatabase(process.env.DB_PATH)) {
   };
   return {
     name: 'SQLite',
+    photoUploads: true,
     findUser: (email) => db.prepare("SELECT u.*,COALESCE(a.role,'user') AS role,COALESCE(a.status,'active') AS status FROM users u LEFT JOIN user_access a ON a.user_id=u.id WHERE u.email=?").get(email),
     getUser: (id) => db.prepare("SELECT u.*,COALESCE(a.role,'user') AS role,COALESCE(a.status,'active') AS status FROM users u LEFT JOIN user_access a ON a.user_id=u.id WHERE u.id=?").get(id),
     listUsers: () => db.prepare("SELECT u.id,u.name,u.email,u.created_at,COALESCE(a.role,'user') AS role,COALESCE(a.status,'active') AS status,(SELECT COUNT(*) FROM reports r WHERE r.owner_id=u.id) AS report_count FROM users u LEFT JOIN user_access a ON a.user_id=u.id ORDER BY u.created_at DESC").all(),

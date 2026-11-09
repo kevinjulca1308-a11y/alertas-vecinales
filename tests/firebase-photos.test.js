@@ -45,6 +45,11 @@ test('Firestore persists Cloudinary URLs, cleans partial uploads and retries del
   const photo = 'data:image/jpeg;base64,' + Buffer.from([255, 216, 255, 0, 0]).toString('base64');
   const report = { title: 'Reporte con fotografías', description: 'Una prueba de fotografías en Guadalupe.', address: 'Sector de prueba, Guadalupe',
     category: 'Alumbrado', priority: 'Media', lat: -7.243057, lng: -79.470741, photos: [photo, photo] };
+  const withoutStorage = firebaseStore(db, { allowLegacyUploads: false });
+  assert.equal(withoutStorage.photoUploads, false);
+  assert.equal(store.photoUploads, true);
+  await assert.rejects(withoutStorage.createReport({ ...report, id: 'AV-NO-PHOTOS' }), error => error.status === 503 && error.code === 'PHOTO_UPLOADS_DISABLED');
+  assert.equal((await db.collection('reports').doc('AV-NO-PHOTOS').get()).exists, false);
   const saved = await call('/reports', { method: 'POST', body: report, cookie });
   assert.equal(saved.status, 201);
   const id = saved.data.report.id;

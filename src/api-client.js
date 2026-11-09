@@ -35,7 +35,7 @@ export function createApiClient({ request, now = Date.now, sleep = (ms) => new P
       const { status, data } = response;
       if (status < 200 || status >= 300) {
         if (status >= 500) checkedAt = -Infinity;
-        throw Object.assign(new Error(data?.error || 'No se pudo completar la operación. Inténtalo nuevamente.'), { status });
+        throw Object.assign(new Error(data?.error || 'No se pudo completar la operación. Inténtalo nuevamente.'), { status, code: data?.code });
       }
       if (!data || typeof data !== 'object') { checkedAt = -Infinity; throw connectionError(); }
       return data;

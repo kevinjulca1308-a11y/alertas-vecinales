@@ -1,5 +1,5 @@
 import { isNative, nativePhoto } from "./native";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Camera,
   ImagePlus,
@@ -33,10 +33,19 @@ export default function ReportForm({ onCreated, onClose }) {
     [busy, setBusy] = useState(false),
     [reading, setReading] = useState(false),
     [finding, setFinding] = useState(false);
+  const [photoAvailability, setPhotoAvailability] = useState('loading');
   const camera = useRef(null),
     gallery = useRef(null),
     readLock = useRef(false),
     submitLock = useRef(false);
+  useEffect(() => {
+    let active = true;
+    api('/capabilities').then((data) => {
+      if (active) setPhotoAvailability(data.photoUploads === false ? 'disabled' : 'enabled');
+    }).catch(() => { if (active) setPhotoAvailability('unknown'); });
+    return () => { active = false; };
+  }, []);
+  const photosBlocked = photoAvailability === 'loading' || photoAvailability === 'disabled';
   const update = (e) => setForm({ ...form, [e.target.name]: e.target.value });
   const upload = async (e) => {
     const files = [...e.target.files];
@@ -59,6 +68,7 @@ export default function ReportForm({ onCreated, onClose }) {
     }
   };
   const choosePhoto = async (source) => {
+    if (photosBlocked) return;
     if (!isNative()) {
       (source === "camera" ? camera : gallery).current.click();
       return;
@@ -120,7 +130,7 @@ export default function ReportForm({ onCreated, onClose }) {
     }
     setStep(step + 1);
   };
-  const submit = async () => {
+  const submit = async (withoutPhotos = false) => {
     if (submitLock.current) return;
     submitLock.current = true;
     setBusy(true);
@@ -128,10 +138,11 @@ export default function ReportForm({ onCreated, onClose }) {
     try {
       const { report } = await api("/reports", {
         method: "POST",
-        body: { ...form, lat: position[0], lng: position[1] },
+        body: { ...form, photos: withoutPhotos ? [] : form.photos, lat: position[0], lng: position[1] },
       });
       onCreated(report);
     } catch (e) {
+      if (e.code === 'PHOTO_UPLOADS_DISABLED') setPhotoAvailability('disabled');
       setError(e.message);
     } finally {
       submitLock.current = false;
@@ -229,6 +240,8 @@ export default function ReportForm({ onCreated, onClose }) {
             <div className="field-label photo-heading">
               Fotos del problema <small>Opcional · hasta 3 fotos</small>
             </div>
+            {photoAvailability === 'disabled' && <div className="photo-availability" role="status"><ImagePlus size={19} /><div><strong>Fotografías todavía no disponibles</strong><p>Puedes publicar tu reporte con el texto y la ubicación. Las fotos se habilitarán cuando se configure su almacenamiento.</p></div></div>}
+            {photoAvailability === 'loading' && <p className="photo-check" role="status">Comprobando la disponibilidad de fotografías...</p>}
             <input
               className="sr-only"
               ref={camera}
@@ -237,6 +250,7 @@ export default function ReportForm({ onCreated, onClose }) {
               accept="image/*"
               capture="environment"
               onChange={upload}
+              disabled={photosBlocked}
             />
             <input
               className="sr-only"
@@ -246,18 +260,19 @@ export default function ReportForm({ onCreated, onClose }) {
               accept="image/*"
               multiple
               onChange={upload}
+              disabled={photosBlocked}
             />
             <div className="photo-inputs">
               <button
                 type="button"
-                disabled={reading || form.photos.length >= 3}
+                disabled={photosBlocked || reading || form.photos.length >= 3}
                 onClick={() => choosePhoto("camera")}
               >
                 <Camera size={20} /> Usar cámara
               </button>
               <button
                 type="button"
-                disabled={reading || form.photos.length >= 3}
+                disabled={photosBlocked || reading || form.photos.length >= 3}
                 onClick={() => choosePhoto("gallery")}
               >
                 {reading ? (
@@ -440,6 +455,7 @@ export default function ReportForm({ onCreated, onClose }) {
             {error}
           </div>
         )}
+        {step === 2 && photoAvailability === 'disabled' && form.photos.length > 0 && <div className="photo-fallback"><p>Tu texto y ubicación se conservan. Puedes enviar el reporte sin las fotografías adjuntas.</p><button type="button" className="button secondary" disabled={busy} onClick={() => submit(true)}>Publicar sin fotografías<Send size={16} /></button></div>}
         <div className="wizard-footer">
           <button
             type="button"
@@ -460,7 +476,7 @@ export default function ReportForm({ onCreated, onClose }) {
           <span>Paso {step + 1} de 3</span>
           <button
             className="button primary"
-            disabled={busy || reading || finding}
+            disabled={busy || reading || finding || (step === 2 && photoAvailability === 'disabled' && form.photos.length > 0)}
           >
             {busy ? (
               <LoaderCircle className="spin" size={17} />

@@ -1,6 +1,7 @@
 import { randomUUID, createHash } from 'node:crypto';
 import { cloudinaryPhotoStore, firebasePhotoStore } from './photo-storage.js';
 import { firebaseCredential } from './firebase-credentials.js';
+import { photoUploadsDisabled } from './errors.js';
 
 const failure = (status, message) => Object.assign(new Error(message), { status });
 const existing = (snapshot) => {
@@ -70,6 +71,7 @@ export function firebaseStore(db, { bucket = null, getDownloadURL, photoStore = 
   };
   return {
     name: 'Firestore',
+    photoUploads: !!uploads,
     cleanupDeletedReport,
     async findUser(email) {
       const index = await emailRef(email).get();
@@ -143,7 +145,7 @@ export function firebaseStore(db, { bucket = null, getDownloadURL, photoStore = 
       };
     },
     async createReport(row) {
-      if (row.photos.length && !uploads) throw failure(503, 'Configura Cloudinary en el servidor para adjuntar fotos.');
+      if (row.photos.length && !uploads) throw photoUploadsDisabled();
       const photos = [], assets = [];
       let committing = false;
       try {

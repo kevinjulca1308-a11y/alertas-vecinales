@@ -2,6 +2,10 @@
 
 Actualización: 9 de noviembre de 2026.
 
+## Envío sin almacenamiento de fotos (1.1.2)
+
+La API expone únicamente la disponibilidad de fotografías, sin claves ni detalles privados. La pantalla de reporte avisa y desactiva los adjuntos si el servidor no tiene almacenamiento configurado. Texto y ubicación siguen disponibles. Si el servidor rechaza las fotos al enviar, se conserva todo el borrador y se ofrece enviar sin fotografías por elección explícita, sin repetir automáticamente la solicitud.
+
 ## Iconos y creador (1.1.1)
 
 Cada servicio tiene un pictograma vectorial propio: placa policial, casco de bomberos, ambulancia, patrulla de Serenazgo, comisaría y apoyo ante violencia. Son símbolos referenciales, no sellos oficiales, y se incluyen dentro del APK. Los accesos rápidos del inicio también muestran sus iconos.
@@ -35,10 +39,10 @@ Directorio consultado el 9 de noviembre de 2026. Los contactos y sus fuentes se 
 
 ## Entrega y verificación
 
-- `npm test`: 21 pruebas pasadas; las 2 pruebas de Firestore requieren el emulador y se omiten cuando no está disponible. No se cambió la API ni la base de datos para este rediseño.
-- `npm run test:e2e`: 8 escenarios, que incluyen persistencia, navegación, emergencias sin API, restauración de preferencias, administración, iconos y contacto del creador en pantallas de 320 a 1440 píxeles.
+- `npm test`: 24 pruebas pasadas con el emulador de Firestore, incluida la ausencia de escrituras al rechazar imágenes y la protección de los errores privados del proveedor.
+- `npm run test:e2e`: 10 escenarios, que incluyen persistencia, navegación, emergencias sin API, restauración de preferencias, administración, iconos, contacto del creador y publicación sin fotos conservando el borrador en pantallas de 320 a 1440 píxeles.
 - Las pruebas de llamadas verifican los enlaces, sin realizar llamadas reales.
-- Android: versión 1.1.1 (código 3), fondo y barras de arranque oscuros. La entrega es un APK de depuración para probar el diseño.
+- Android: versión 1.1.2 (código 4), fondo y barras de arranque oscuros. La entrega es un APK de depuración para probar el diseño.
 
 ## Siguientes mejoras propuestas
 
