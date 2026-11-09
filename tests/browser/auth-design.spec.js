@@ -74,7 +74,7 @@ test('mobile registration, return navigation and reversible background preferenc
   await page.getByRole('button', { name: 'Abrir mi cuenta' }).click();
   await expect(page.getByRole('button', { name: 'Liso', exact: true })).toHaveAttribute('aria-pressed', 'true');
   await page.getByRole('button', { name: 'Degradado', exact: true }).click();
-  await page.getByLabel('Tema de la aplicación').last().selectOption('dark');
+  await page.getByRole('button', { name: 'Noche', exact: true }).click();
   await expect(page.locator('html')).toHaveAttribute('data-background', 'gradient');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath('preferencias-movil.png'), fullPage: true });

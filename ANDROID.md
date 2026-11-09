@@ -12,7 +12,7 @@ El repositorio incluye el proyecto Android de Capacitor en `android/`. La interf
 
 - Node.js **24 LTS** (incluye npm).
 - Android Studio actualizado, con el SDK **Android 15 / API 35** y Build Tools **35.0.0**. Android Studio te ofrecerá instalar los componentes que falten al sincronizar.
-- En Android Studio, usa el **JDK 21** incluido: Settings → Build, Execution, Deployment → Build Tools → Gradle → Gradle JDK.
+- En Android Studio, selecciona **JDK 21** en Settings → Build, Execution, Deployment → Build Tools → Gradle → Gradle JDK. Una instalación reciente de Android Studio puede incluir un JBR más nuevo; Gradle 8.11.1 no admite Java 25. En este equipo está disponible JDK 21 en `C:/Users/PC-02CI/.jdks/jbr-21.0.11`.
 
 ## 1. Descargar e instalar
 
